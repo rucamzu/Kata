@@ -1,3 +1,9 @@
 # Build outputs
 obj/
 bin/
+
+# Paket
+.paket
+paket-files/
+packages/
+paket.lock
