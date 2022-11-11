@@ -7,3 +7,10 @@ bin/
 paket-files/
 packages/
 paket.lock
+
+# Fake
+.fake/
+
+# Ionide
+.ionide/
+TestResults/
