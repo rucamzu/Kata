@@ -7,4 +7,4 @@ module Game =
 
     let score = function Game score' -> score'
 
-    let bowl knockedPins _ = Game knockedPins
+    let bowl knockedPins = function Game score -> Game (score + knockedPins)

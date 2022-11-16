@@ -24,4 +24,12 @@ let ScoreTests = testList "score" [
             |> Game.score
             |> Expect.equal $"the score after knocking down {knockedPins} pin(s) on the first bowl should be the number of knocked down pins: {knockedPins}" knockedPins)
 
+    test "after an open frame is the total amount of knocked pins" {
+        Game.newGame
+        |> Game.bowl 3
+        |> Game.bowl 5
+        |> Game.score
+        |> Expect.equal $"the score after an open frame should be the total amount number of knocked down pins:" 8
+    }
+
 ]
