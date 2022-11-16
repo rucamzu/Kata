@@ -7,6 +7,11 @@ open BowlingFs
 
 module Gen =
     let firstBowl = Gen.choose(0, 10)
+    let openFrame =
+        Gen.choose(0, 10)
+        |> Gen.listOfLength 2
+        |> Gen.filter (List.sum >> ((>) 10))
+        
 
 [<Tests>]
 let ScoreTests = testList "score" [
@@ -24,12 +29,11 @@ let ScoreTests = testList "score" [
             |> Game.score
             |> Expect.equal $"the score after knocking down {knockedPins} pin(s) on the first bowl should be the number of knocked down pins: {knockedPins}" knockedPins)
 
-    test "after an open frame is the total amount of knocked pins" {
-        Game.newGame
-        |> Game.bowl 3
-        |> Game.bowl 5
-        |> Game.score
-        |> Expect.equal $"the score after an open frame should be the total amount number of knocked down pins:" 8
-    }
+    testProperty "after an open frame is the total amount of knocked pins"
+        (Prop.forAll (Arb.fromGen Gen.openFrame) <| fun bowls ->
+            bowls
+            |> List.fold (fun game knockedPins -> Game.bowl knockedPins game) Game.newGame
+            |> Game.score
+            |> Expect.equal $"the score after knocking down {bowls[0]} and {bowls[1]} pins on the first frame should be the total amount of knocked down pins: {List.sum bowls}" (List.sum bowls))
 
 ]
