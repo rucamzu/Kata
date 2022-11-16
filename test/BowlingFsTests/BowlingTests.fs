@@ -5,6 +5,8 @@ open Expecto.Flip
 open FsCheck
 open BowlingFs
 
+let private flip f b a = f a b
+
 module Gen =
     let firstBowl = Gen.choose(0, 10)
     let openFrame =
@@ -32,7 +34,7 @@ let ScoreTests = testList "score" [
     testProperty "after an open frame is the total amount of knocked pins"
         (Prop.forAll (Arb.fromGen Gen.openFrame) <| fun bowls ->
             bowls
-            |> List.fold (fun game knockedPins -> Game.bowl knockedPins game) Game.newGame
+            |> List.fold (flip Game.bowl) Game.newGame
             |> Game.score
             |> Expect.equal $"the score after knocking down {bowls[0]} and {bowls[1]} pins on the first frame should be the total amount of knocked down pins: {List.sum bowls}" (List.sum bowls))
 
