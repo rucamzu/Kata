@@ -33,7 +33,7 @@ let ScoreTests = testList "score" [
             "the score of a new game should be zero"
     }
 
-    testProperty "after bowling once is the amount of knocked pins"
+    testPropertyWithConfig config "after bowling once is the amount of knocked pins"
         (Prop.forAll (Arb.fromGen Gen.firstBowl) <| fun knockedPins ->
             Game.newGame
             |> Game.bowl knockedPins
@@ -41,7 +41,7 @@ let ScoreTests = testList "score" [
             |> Expect.equal knockedPins
                 $"the score after knocking down {knockedPins} pin(s) on the first bowl should be the amount of knocked down pins: {knockedPins}")
 
-    testProperty "after an open frame is the total amount of knocked pins"
+    testPropertyWithConfig config "after an open frame is the total amount of knocked pins"
         (Prop.forAll (Arb.fromGen Gen.openFrame) <| fun bowls ->
             bowls
             |> List.fold (flip Game.bowl) Game.newGame
@@ -49,7 +49,7 @@ let ScoreTests = testList "score" [
             |> Expect.equal (List.sum bowls)
                 $"the score after knocking down {bowls[0]} and {bowls[1]} pins on the first frame should be the total amount of knocked down pins: {List.sum bowls}" )
 
-    testProperty "after consecutive open frames is the total amount of knocked pins"
+    testPropertyWithConfig config "after consecutive open frames is the total amount of knocked pins"
         (Prop.forAll (Arb.fromGen Gen.openFrames) <| fun bowls ->
             bowls
             |> List.fold (flip Game.bowl) Game.newGame
