@@ -24,12 +24,12 @@ let ScoreTests = testList "score" [
         |> Expect.equal "the score of a new game should be zero" 0
     }
 
-    testProperty "after bowling once is the amomunt of knocked pins"
+    testProperty "after bowling once is the amount of knocked pins"
         (Prop.forAll (Arb.fromGen Gen.firstBowl) <| fun knockedPins ->
             Game.newGame
             |> Game.bowl knockedPins
             |> Game.score
-            |> Expect.equal $"the score after knocking down {knockedPins} pin(s) on the first bowl should be the number of knocked down pins: {knockedPins}" knockedPins)
+            |> Expect.equal $"the score after knocking down {knockedPins} pin(s) on the first bowl should be the amount of knocked down pins: {knockedPins}" knockedPins)
 
     testProperty "after an open frame is the total amount of knocked pins"
         (Prop.forAll (Arb.fromGen Gen.openFrame) <| fun bowls ->
