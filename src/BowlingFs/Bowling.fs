@@ -7,6 +7,12 @@ type Frame =
 type Game = private Game of frames:Frame list
 
 module Frame =
+    let newFrame = PlayingFrame
+
+    let bowl knockedPins = function
+        | PlayingFrame firstBowlScore -> OpenFrame (firstBowlScore, knockedPins)
+        | frame -> frame
+
     let score = function
         | PlayingFrame firstBowlScore -> firstBowlScore
         | OpenFrame (firstBowlScore, secondBowlScore) -> firstBowlScore + secondBowlScore
@@ -20,8 +26,8 @@ module Game =
 
     let bowl knockedPins = function
         | Game (PlayingFrame firstBowlScore :: frames) ->
-            OpenFrame (firstBowlScore, knockedPins) :: frames
+            Frame.bowl knockedPins (PlayingFrame firstBowlScore) :: frames
             |> Game
         | Game frames ->
-            PlayingFrame knockedPins :: frames
+            Frame.newFrame knockedPins :: frames
             |> Game
