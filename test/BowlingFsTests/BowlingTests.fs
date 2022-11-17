@@ -21,6 +21,11 @@ module Gen =
         openFrame
         |> Gen.listOf
         |> Gen.map (List.collect id)
+    let spare =
+        Gen.choose(0, 10)
+        |> Gen.listOfLength 2
+        |> Gen.filter (List.head >> ((>) 10))
+        |> Gen.filter (List.sum >> ((=) 10))
         
 
 [<Tests>]
@@ -56,5 +61,13 @@ let ScoreTests = testList "score" [
             |> Game.score
             |> Expect.equal (List.sum bowls)
                 $"""the score after knocking down {bowls |> List.map (fun n -> $"{n}") |> String.concat " + "} pins on the first frame(s) should be the total amount of knocked down pins: {List.sum bowls}""")
+
+    testPropertyWithConfig config "after a spare bonuses the next bowl"
+        (Prop.forAll ([Gen.spare; Gen.firstBowl |> Gen.map List.singleton] |> Gen.collect id |> Gen.map (List.collect id) |> Arb.fromGen) <| fun bowls ->
+            bowls
+            |> List.fold (flip Game.bowl) Game.newGame
+            |> Game.score
+            |> Expect.equal (bowls |> List.sum |> (+) bowls[2])
+                $"""the score after a {bowls |> List.take 2 |> List.map (fun n -> $"{n}") |> String.concat " + "} spare should bonus the score of the following bowl: {bowls |> List.sum |> (+) bowls[2]}""")
 
 ]
