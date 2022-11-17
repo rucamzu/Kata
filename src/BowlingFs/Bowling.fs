@@ -12,22 +12,22 @@ type Frame =
 type Game = private Game of frames:Frame list
 
 module Bowl =
-    let make = Bowl
+    let bowl = Bowl
 
     let score = function
         | Bowl knockedPins -> knockedPins
         | Bonus -> 0
 
 module Frame =
-    let newFrame = Bowl.make >> Bowling
+    let newFrame = Bowl.bowl >> Bowling
 
     let bowl knockedPins = function
         | Bowling first ->
             match (Bowl.score first) + knockedPins with
-            | 10 -> Spare (first, Bowl.make knockedPins, Bonus)
-            | _ -> OpenFrame (first, Bowl.make knockedPins)
+            | 10 -> Spare (first, Bowl.bowl knockedPins, Bonus)
+            | _ -> OpenFrame (first, Bowl.bowl knockedPins)
         | Spare (first, second, Bonus) ->
-            Spare (first, second, Bowl.make knockedPins)
+            Spare (first, second, Bowl.bowl knockedPins)
         | frame -> frame
 
     let private bowls = function
@@ -40,10 +40,6 @@ module Frame =
 module Game =
     let newGame = Game []
 
-    let private frames = function Game frames' -> frames'
-
-    let score = frames >> List.map Frame.score >> List.sum
-
     let bowl knockedPins = function
         | Game (Bowling first :: frames) ->
             Frame.bowl knockedPins (Bowling first) :: frames
@@ -54,3 +50,7 @@ module Game =
         | Game frames ->
             Frame.newFrame knockedPins :: frames
             |> Game
+
+    let private frames = function Game frames' -> frames'
+
+    let score = frames >> List.map Frame.score >> List.sum
