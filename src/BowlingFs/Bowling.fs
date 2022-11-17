@@ -40,17 +40,17 @@ module Frame =
 module Game =
     let newGame = Game []
 
-    let bowl knockedPins = function
-        | Game (Bowling first :: frames) ->
-            Frame.bowl knockedPins (Bowling first) :: frames
-            |> Game
-        | Game (Spare (first, second, Bonus) :: frames) ->
-            Frame.newFrame knockedPins :: (Frame.bowl knockedPins (Spare (first, second, Bonus)) :: frames)
-            |> Game
-        | Game frames ->
-            Frame.newFrame knockedPins :: frames
-            |> Game
-
     let private frames = function Game frames' -> frames'
+
+    let bowl knockedPins game =
+        match frames game with
+        | Bowling _ :: _ ->
+            game
+            |> frames
+            |> List.map (Frame.bowl knockedPins)
+            |> Game
+        | frames ->
+            Frame.newFrame knockedPins :: (List.map (Frame.bowl knockedPins) frames)
+            |> Game
 
     let score = frames >> List.map Frame.score >> List.sum
