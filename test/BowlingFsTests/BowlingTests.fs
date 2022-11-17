@@ -6,6 +6,8 @@ open BowlingFs
 
 let private flip f b a = f a b
 
+let private formatBowls = List.map (fun n -> $"{n}") >> String.concat " + "
+
 let private config = { FsCheckConfig.defaultConfig with startSize = 1; endSize = 10; maxTest = 100 }
 
 module private Expect =
@@ -52,7 +54,7 @@ let ScoreTests = testList "score" [
             |> List.fold (flip Game.bowl) Game.newGame
             |> Game.score
             |> Expect.equal (List.sum bowls)
-                $"the score after knocking down {bowls[0]} and {bowls[1]} pins on the first frame should be the total amount of knocked down pins: {List.sum bowls}" )
+                $"the score after knocking down {formatBowls bowls} pins on the first frame should be the total amount of {List.sum bowls} knocked down pins" )
 
     testPropertyWithConfig config "after consecutive open frames is the total amount of knocked pins"
         (Prop.forAll (Arb.fromGen Gen.openFrames) <| fun bowls ->
@@ -60,7 +62,7 @@ let ScoreTests = testList "score" [
             |> List.fold (flip Game.bowl) Game.newGame
             |> Game.score
             |> Expect.equal (List.sum bowls)
-                $"""the score after knocking down {bowls |> List.map (fun n -> $"{n}") |> String.concat " + "} pins on the first frame(s) should be the total amount of knocked down pins: {List.sum bowls}""")
+                $"""the score after knocking down {formatBowls bowls} pins on the first frame(s) should be the total amount of {List.sum bowls} knocked down pins""")
 
     testPropertyWithConfig config "after a spare bonuses the next bowl"
         (Prop.forAll ([Gen.spare; Gen.firstBowl |> Gen.map List.singleton] |> Gen.collect id |> Gen.map (List.collect id) |> Arb.fromGen) <| fun bowls ->
@@ -68,6 +70,6 @@ let ScoreTests = testList "score" [
             |> List.fold (flip Game.bowl) Game.newGame
             |> Game.score
             |> Expect.equal (bowls |> List.sum |> (+) bowls[2])
-                $"""the score after a {bowls |> List.take 2 |> List.map (fun n -> $"{n}") |> String.concat " + "} spare should bonus the score of the following bowl: {bowls |> List.sum |> (+) bowls[2]}""")
+                $"""the score after knocking down {formatBowls bowls} pins should bonus the bowl following the spare ({bowls[2]}) for a total of {bowls |> List.sum |> (+) bowls[2]}""")
 
 ]
