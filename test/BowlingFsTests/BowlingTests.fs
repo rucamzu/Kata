@@ -80,4 +80,12 @@ let ScoreTests = testList "score" [
             |> Expect.equal (bowls |> List.sum |> (+) bowls[2] |> (+) bowls[4])
                 $"""the score after knocking down {formatBowls bowls} pins should bonus the bowls following each spare ({bowls[2]} + {bowls[4]}) for a total of {bowls |> List.sum |> (+) bowls[2] |> (+) bowls[4]}""")
 
+    testPropertyWithConfig config "after a strike bonuses the next two bowls"
+        (Prop.forAll (Arb.fromGen Gen.openFrame) <| fun bowls ->
+            10 :: bowls
+            |> List.fold (flip Game.bowl) Game.newGame
+            |> Game.score
+            |> Expect.equal (10 + (List.sum bowls) * 2)
+                $"""the score after knocking down {formatBowls (10 :: bowls)} pins should bonus the two bowls following the strike for a total of {10 + (List.sum bowls) * 2}""")
+
 ]
