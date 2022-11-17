@@ -50,43 +50,49 @@ let ScoreTests = testList "score" [
 
     testPropertyWithConfig config "after an open frame is the total amount of knocked pins"
         (Prop.forAll (Arb.fromGen Gen.openFrame) <| fun bowls ->
+            let expectedScore: int = List.sum bowls
             bowls
             |> List.fold (flip Game.bowl) Game.newGame
             |> Game.score
-            |> Expect.equal (List.sum bowls)
-                $"the score after knocking down {formatBowls bowls} pins on the first frame should be the total amount of {List.sum bowls} knocked down pins" )
+            |> Expect.equal expectedScore
+                $"the score after knocking down {formatBowls bowls} pins on the first frame should be the total amount of {expectedScore} knocked down pins" )
 
     testPropertyWithConfig config "after consecutive open frames is the total amount of knocked pins"
         (Prop.forAll (Arb.fromGen Gen.openFrames) <| fun bowls ->
+            let expectedScore: int = List.sum bowls
             bowls
             |> List.fold (flip Game.bowl) Game.newGame
             |> Game.score
-            |> Expect.equal (List.sum bowls)
-                $"""the score after knocking down {formatBowls bowls} pins on the first frame(s) should be the total amount of {List.sum bowls} knocked down pins""")
+            |> Expect.equal expectedScore
+                $"""the score after knocking down {formatBowls bowls} pins on the first frame(s) should be the total amount of {expectedScore} knocked down pins""")
 
     testPropertyWithConfig config "after a spare bonuses the next bowl"
         (Prop.forAll ([Gen.spare; Gen.firstBowl |> Gen.map List.singleton] |> Gen.collect id |> Gen.map (List.collect id) |> Arb.fromGen) <| fun bowls ->
+            let expectedScore: int = (List.sum bowls) + bowls[2]
             bowls
             |> List.fold (flip Game.bowl) Game.newGame
             |> Game.score
-            |> Expect.equal (bowls |> List.sum |> (+) bowls[2])
-                $"""the score after knocking down {formatBowls bowls} pins should bonus the bowl following the spare ({bowls[2]}) for a total of {bowls |> List.sum |> (+) bowls[2]}""")
+            |> Expect.equal expectedScore
+                $"""the score after knocking down {formatBowls bowls} pins should bonus the bowl following the spare ({bowls[2]}) for a total of {expectedScore}""")
 
     testPropertyWithConfig config "after consecutive spares bonuses the bowls following each spare"
         (Prop.forAll ([Gen.spare; Gen.spare; Gen.firstBowl |> Gen.map List.singleton] |> Gen.collect id |> Gen.map (List.collect id) |> Arb.fromGen) <| fun bowls ->
+            let expectedScore = (List.sum bowls) + bowls[2] + bowls[4]
             bowls
             |> List.fold (flip Game.bowl) Game.newGame
             |> Game.score
-            |> Expect.equal (bowls |> List.sum |> (+) bowls[2] |> (+) bowls[4])
-                $"""the score after knocking down {formatBowls bowls} pins should bonus the bowls following each spare ({bowls[2]} + {bowls[4]}) for a total of {bowls |> List.sum |> (+) bowls[2] |> (+) bowls[4]}""")
+            |> Expect.equal expectedScore
+                $"""the score after knocking down {formatBowls bowls} pins should bonus the bowls following each spare ({bowls[2]} + {bowls[4]}) for a total of {expectedScore}""")
 
     testPropertyWithConfig config "after a strike bonuses the next two bowls"
         (Prop.forAll (Arb.fromGen Gen.openFrame) <| fun bowls ->
-            10 :: bowls
+            let bowls' = 10 :: bowls
+            let expectedScore = 10 + (List.sum bowls) * 2
+            bowls'
             |> List.fold (flip Game.bowl) Game.newGame
             |> Game.score
-            |> Expect.equal (10 + (List.sum bowls) * 2)
-                $"""the score after knocking down {formatBowls (10 :: bowls)} pins should bonus the two bowls following the strike for a total of {10 + (List.sum bowls) * 2}""")
+            |> Expect.equal expectedScore
+                $"""the score after knocking down {formatBowls bowls'} pins should bonus the two bowls following the strike for a total of {expectedScore}""")
 
     testPropertyWithConfig config "after consecutive strikes bonuses the next two bowls following each strike"
         (Prop.forAll (Arb.fromGen Gen.openFrame) <| fun bowls ->
