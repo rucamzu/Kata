@@ -25,13 +25,16 @@ module Frame =
         | knockedPins -> knockedPins |> Bowl.bowl |> Bowling
 
     let bowl knockedPins = function
+        | Bowling first when (Bowl.score first) + knockedPins = 10 ->
+            Spare (first, Bowl.bowl knockedPins, Bonus)
         | Bowling first ->
-            match (Bowl.score first) + knockedPins with
-            | 10 -> Spare (first, Bowl.bowl knockedPins, Bonus)
-            | _ -> OpenFrame (first, Bowl.bowl knockedPins)
-        | Spare (first, second, Bonus) -> Spare (first, second, Bowl.bowl knockedPins)
-        | Strike (Bonus, Bonus) -> Strike (Bowl.bowl knockedPins, Bonus)
-        | Strike (second, Bonus) -> Strike (second, Bowl.bowl knockedPins)
+            OpenFrame (first, Bowl.bowl knockedPins)
+        | Spare (first, second, Bonus) ->
+            Spare (first, second, Bowl.bowl knockedPins)
+        | Strike (Bonus, Bonus) ->
+            Strike (Bowl.bowl knockedPins, Bonus)
+        | Strike (second, Bonus) ->
+            Strike (second, Bowl.bowl knockedPins)
         | frame -> frame
 
     let private bowls = function
