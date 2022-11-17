@@ -1,21 +1,31 @@
 ﻿namespace BowlingFs
 
+type Bowl = private Bowl of knockedPins:int
+
 type Frame =
-    | PlayingFrame of first:int
-    | OpenFrame of first:int * second:int
+    | PlayingFrame of first:Bowl
+    | OpenFrame of first:Bowl * second:Bowl
 
 type Game = private Game of frames:Frame list
 
+module Bowl =
+    let make = Bowl
+
+    let score = function Bowl knockedPins -> knockedPins
+
 module Frame =
-    let newFrame = PlayingFrame
+    let newFrame = Bowl.make >> PlayingFrame
 
     let bowl knockedPins = function
-        | PlayingFrame firstBowlScore -> OpenFrame (firstBowlScore, knockedPins)
+        | PlayingFrame first -> OpenFrame (first, Bowl.make knockedPins)
         | frame -> frame
 
     let score = function
-        | PlayingFrame firstBowlScore -> firstBowlScore
-        | OpenFrame (firstBowlScore, secondBowlScore) -> firstBowlScore + secondBowlScore
+        | PlayingFrame first -> Bowl.score first
+        | OpenFrame (first, second) ->
+            [first; second]
+            |> List.map Bowl.score
+            |> List.sum
 
 module Game =
     let newGame = Game []
@@ -25,8 +35,8 @@ module Game =
     let score = frames >> List.map Frame.score >> List.sum
 
     let bowl knockedPins = function
-        | Game (PlayingFrame firstBowlScore :: frames) ->
-            Frame.bowl knockedPins (PlayingFrame firstBowlScore) :: frames
+        | Game (PlayingFrame first :: frames) ->
+            Frame.bowl knockedPins (PlayingFrame first) :: frames
             |> Game
         | Game frames ->
             Frame.newFrame knockedPins :: frames
