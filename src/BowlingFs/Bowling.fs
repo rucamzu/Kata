@@ -30,16 +30,12 @@ module Frame =
             Spare (first, second, Bowl.make knockedPins)
         | frame -> frame
 
-    let score = function
-        | Bowling first -> Bowl.score first
-        | OpenFrame (first, second) ->
-            [first; second]
-            |> List.map Bowl.score
-            |> List.sum
-        | Spare (first, second, third) ->
-            [first; second; third]
-            |> List.map Bowl.score
-            |> List.sum
+    let private bowls = function
+        | Bowling first -> [first]
+        | OpenFrame (first, second) -> [first; second]
+        | Spare (first, second, third) -> [first; second; third]
+
+    let score = bowls >> List.map Bowl.score >> List.sum
 
 module Game =
     let newGame = Game []
