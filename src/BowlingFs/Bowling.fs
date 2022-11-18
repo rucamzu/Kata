@@ -10,7 +10,9 @@ type Frame =
     | Spare of first:Bowl * second:Bowl * third:Bowl
     | Strike of second:Bowl * third:Bowl
 
-type Game = private Game of frames:Frame list
+type Game =
+    | Game of frames:Frame list
+    | FinishedGame of frames:Frame list
 
 module Bowl =
     let bowl = Bowl
@@ -45,22 +47,43 @@ module Frame =
 
     let score = bowls >> List.map Bowl.score >> List.sum
 
+    let (|WithBowlsRemaining|_|) frame =
+        match frame with
+        | Bowling _ -> Some frame
+        | _ -> None
+
 module Game =
-    let private ofFrames = Game
+    let private ofFrames frames =
+        match frames with
+        | Frame.WithBowlsRemaining _ :: _ -> Game frames
+        | frames' when frames'.Length < 10 -> Game frames
+        | _ -> FinishedGame frames
 
     let newGame = ofFrames []
 
-    let private frames = function Game frames' -> frames'
+    let private frames = function
+        | Game frames' -> frames'
+        | FinishedGame frames' -> frames'
 
     let bowl knockedPins game =
-        match frames game with
-        | Bowling _ :: _ ->
+        match game with
+        | Game (Bowling _ :: _) ->
             game
             |> frames
             |> List.map (Frame.bowl knockedPins)
             |> ofFrames
-        | frames ->
+        | Game frames when frames.Length < 10 ->
             Frame.newFrame knockedPins :: (List.map (Frame.bowl knockedPins) frames)
             |> ofFrames
+        | Game frames ->
+            frames
+            |> List.map (Frame.bowl knockedPins)
+            |> ofFrames
+        | _ -> game
+
 
     let score = frames >> List.map Frame.score >> List.sum
+
+    let finished = function
+        | FinishedGame _ -> true
+        | _ -> false
