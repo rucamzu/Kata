@@ -111,6 +111,15 @@ let ScoreTests = testList "bowling" [
                 |> Expect.equal expectedScore
                     $"""the score after knocking down {formatBowls bowls'} pins should bonus the two bowls following each strike for a total of {expectedScore}""")
 
+        test "of a perfect game is 300" {
+            10
+            |> List.replicate 12
+            |> List.fold (flip Game.bowl) Game.newGame
+                |> Game.score
+                |> Expect.equal 300
+                    $"""the score of a perfect game should be 300"""
+        }
+
     ]
 
     testPropertyWithConfig config "game finishes after ten frames"
@@ -120,4 +129,5 @@ let ScoreTests = testList "bowling" [
             |> Game.bowl 0
             |> Game.finished
             |> Expect.isTrue "a game should finish after ten frames")
+
 ]

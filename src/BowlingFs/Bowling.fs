@@ -50,6 +50,8 @@ module Frame =
     let (|WithBowlsRemaining|_|) frame =
         match frame with
         | Bowling _ -> Some frame
+        | Spare (_, _, Bonus) -> Some frame
+        | Strike (_, Bonus) -> Some frame
         | _ -> None
 
 module Game =
