@@ -46,7 +46,9 @@ module Frame =
     let score = bowls >> List.map Bowl.score >> List.sum
 
 module Game =
-    let newGame = Game []
+    let private ofFrames = Game
+
+    let newGame = ofFrames []
 
     let private frames = function Game frames' -> frames'
 
@@ -56,9 +58,9 @@ module Game =
             game
             |> frames
             |> List.map (Frame.bowl knockedPins)
-            |> Game
+            |> ofFrames
         | frames ->
             Frame.newFrame knockedPins :: (List.map (Frame.bowl knockedPins) frames)
-            |> Game
+            |> ofFrames
 
     let score = frames >> List.map Frame.score >> List.sum
