@@ -1,0 +1,9 @@
+group Test
+Expecto
+FsCheck
+Expecto.FsCheck
+Expecto.BenchmarkDotNet
+Expecto.Hopac
+Logary.Adapters.Facade
+Microsoft.NET.Test.Sdk
+YoloDev.Expecto.TestSdk

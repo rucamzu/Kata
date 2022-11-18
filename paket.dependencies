@@ -1,0 +1,16 @@
+source https://api.nuget.org/v3/index.json
+
+storage: none
+framework: net5.0, netstandard2.0, netstandard2.1
+
+group Test
+source https://api.nuget.org/v3/index.json
+
+nuget Expecto
+nuget Expecto.BenchmarkDotNet
+nuget Expecto.FsCheck
+nuget Expecto.Hopac
+nuget FsCheck
+nuget Logary.Adapters.Facade
+nuget Microsoft.NET.Test.Sdk
+nuget YoloDev.Expecto.TestSdk
